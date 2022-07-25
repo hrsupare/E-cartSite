@@ -1,7 +1,7 @@
 const getUser = async function (req, res) {
     try {
       let userId = req.params
-      console.log(params)
+      console.log(userId)
       const getUser = await userModel.findOne({id:userId})
   
       if (!getUser) {
