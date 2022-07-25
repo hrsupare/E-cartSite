@@ -7,7 +7,7 @@ const router=express.Router();
 
 
 
-
+router.get('GET/user/:userId/profile',)
 
 
 
