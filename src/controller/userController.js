@@ -122,7 +122,7 @@ const createUser = async function (req, res) {
         });
     }
 
-    data.email = email;
+    data.email = email.trim();
 
     //===== validate and uplode profile photo ======//
     let fileData = files[0];
@@ -167,7 +167,7 @@ const createUser = async function (req, res) {
         });
     }
 
-    data.phone = phone;
+    data.phone = phone.trim();
 
     //===== validate and hash password ======//
     if (!isValidData(password)) {
