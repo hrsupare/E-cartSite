@@ -54,11 +54,7 @@ const createUser = async function (req, res) {
     let data = req.body;
 
     const { fname, lname, email, phone, password } = data;
-    try {
-      data.address = JSON.parse(data.address);
-    } catch {
-      return res.status(400).send({ message: "please enter Valid pincode" });
-    }
+ 
     let files = req.files;
     //===== validate body ======//
     if (!isValidRequestBody(data)) {
@@ -71,15 +67,15 @@ const createUser = async function (req, res) {
     if (!isValidData(fname)) {
       return res
         .status(400)
-        .send({ status: false, message: "please enter your good Name" });
+        .send({ status: false, message: "please enter your first Name" });
     }
-    if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(fname)) {
-      return res.status(400).send({
-        status: false,
-        message: `Heyyy....! ${fname} is not a valid first name`,
-      });
-    }
-    data.fname = fname.trim().split(" ").filter((word) => word).join(" ");
+    // if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(fname)) {
+    //   return res.status(400).send({
+    //     status: false,
+    //     message: `Heyyy....! ${fname} is not a valid first name`,
+    //   });
+    // }
+    // data.fname = fname.trim().split(" ").filter((word) => word).join(" ");
 
     //===== validate  lname  ======//
     if (!isValidData(lname)) {
@@ -127,7 +123,7 @@ const createUser = async function (req, res) {
     //===== validate and uplode profile photo ======//
     let fileData = files[0];
     if (files.length == 0) {
-      return res.status(400).send({ message: "No file found" });
+      return res.status(400).send({ message: "No Profile image found" });
     }
 
     if (!/([/|.|\w|\s|-])*\.(?:jpg|jpeg|png|JPG|JPEG|PNG)/.test(fileData.originalname)) {
@@ -139,9 +135,7 @@ const createUser = async function (req, res) {
     if (files && files.length > 0) {
       let uploadedFileURL = await uploadFile(files[0]);
       data.profileImage = uploadedFileURL;
-    } else {
-      return res.status(400).send({ message: "No file found" });
-    }
+    } 
 
     //===== validate phone ======//
     if (!isValidData(phone)) {
@@ -179,7 +173,7 @@ const createUser = async function (req, res) {
     if (!/^[a-zA-Z0-9@*&$#!]{8,15}$/.test(password)) {
       return res.status(400).send({
         status: false,
-        message: "please enter valid password max 8 or min 15 digit",
+        message: "please enter valid password min 8 or max 15 digit",
       });
     }
     //hashing
@@ -189,6 +183,28 @@ const createUser = async function (req, res) {
 
     //===== validate address ======//
     //===== validate address ======//
+    if (!data.address || data.address.trim().length==0) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "please add  address details  " });
+    }
+    try {
+      
+      data.address = JSON.parse(data.address);
+      
+    } catch {
+      return res.status(400).send({ message: "please enter Valid pincode" });
+    } 
+    if(!data.address.shipping){
+      return res
+        .status(400)
+        .send({ status: false, msg: "please add shipping details  " });
+    }
+    if(!data.address.billing){
+      return res
+        .status(400)
+        .send({ status: false, msg: "please add billing details  " });
+    }
     if (
       !isValidData(data.address.shipping.street) ||
       !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(
@@ -309,12 +325,9 @@ let loginUser = async function (req, res) {
     let token = jwt.sign(
       {
         userId: userId,
-        // group: seventy - one,
         project: "Products Management",
-        iat: Math.floor(Date.now() / 1000), //1sec=1000ms, date.now return times in milliseconds.
-        exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60,
-      },
-      "group71-project5"
+      },"group71-project5",{expiresIn:'30m'},
+      
     );
 
     {
@@ -375,9 +388,8 @@ const updateUserDetail = async (req, res) => {
 
     if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: 'UserId is not valid' })
 
-
-    const findUser = await userModel.findOne({ _id: userId })
-    if (!findUser) return res.status(400).send({ status: false, message: 'User not found' })
+    const findUser = await userModel.findOne({ _id: userId })  //doubt
+    if (!findUser) return res.status(404).send({ status: false, message: 'User not found' })
 
 
     //----------authorisation---------------------------------------------
@@ -385,6 +397,9 @@ const updateUserDetail = async (req, res) => {
     if (userId != req.userDetail.userId)
       return res.status(403).send({ status: false, message: "Not Authourised" })
     //-----------------------------------------------------------------
+
+
+
 
     if (fname == 0) return res.status(400).send({ status: false, message: "fname is empty" })
     if (fname) {

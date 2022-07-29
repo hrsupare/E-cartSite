@@ -39,72 +39,74 @@ const isValidData = function (value) {
 };
 //////////----------------------------------------------------------------  
 
-//================================== createProduct ===================================================
 
+//=/=/=/=/=/=/=/=/=/=/=/=/=/=/= createProduct =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
 const createProduct = async (req, res) => {
 
     try {
-        let reGex = /^\s*[a-zA-Z0-9 ]{2,}\s*$/
-
-        let reGex1 = /^(?=.*?[a-zA-Z])[. %?a-zA-Z\d ]+$/
-
-        let priceRegex = /^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)$/
-
         const data = req.body
         let files = req.files
 
-        let { title, description, price, currencyId, currencyFormat, isFreeShipping, productImage, style, availableSizes, installments, isDeleted } = data
+        let { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes, installments } = data
 
         if (!Object.keys(data).length) return res.status(400).send({ status: false, message: "body is Required.." })
 
+
         if (!isValidData(title)) return res.status(400).send({ status: false, message: "title is Required.." })
 
-        if (!reGex.test(title)) return res.status(400).send({ status: false, msg: `title is not a valid it can be aphaNumeric` });
+        if (!/^(?=.*?[a-zA-Z])[,.! %?a-zA-Z\d ]+$/.test(title)) return res.status(400).send({ status: false, msg: `title is not a valid it can be aphaNumeric` });
+
 
         let uniqueTitle = await productModel.findOne({ title: title })
 
         if (uniqueTitle) return res.status(400).send({ status: false, message: ` ${title} is Already Exist ` })
 
+        data.title = title.trim().split(" ").filter((word) => word).join(" ");
+
         if (!isValidData(description)) return res.status(400).send({ status: false, message: "description is Required.." })
 
-        if (!reGex1.test(description)) return res.status(400).send({ status: false, message: "description is not Valid." })
+        if (!/^(?=.*?[a-zA-Z])[,.! %?a-zA-Z\d ]+$/.test(description)) return res.status(400).send({ status: false, message: "description is not Valid." })
+
+        data.description = description.trim().split(" ").filter((word) => word).join(" ");
 
         if (!price || price.trim().length == 0) return res.status(400).send({ status: false, message: " Price is Required.." })
 
-        if (!priceRegex.test(price)) return res.status(400).send({ status: false, message: " Price is in this Format 200 || 200.00" })
+        if (!/^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)$/.test(price)) return res.status(400).send({ status: false, message: " Price is in this Format 200 || 200.00" })
+
+        if (currencyId == 0) return res.status(400).send({ status: false, message: "currencyId is Required.." })
 
         if (currencyId) {
-
-            if (currencyId.trim().length == 0) return res.status(400).send({ status: false, message: " currencyId is Required.." })
 
             if (currencyId.toUpperCase() != "INR") return res.status(400).send({ status: false, message: " currencyId is only INR" })
             data.currencyId = currencyId.toUpperCase()
         }
-        if (!currencyId) {
-            data.currencyId = "INR"
-        }
+        // if (!currencyId) {
+        //     data.currencyId = "INR"
+        // }
 
+        if (currencyFormat == 0) return res.status(400).send({ status: false, message: " currencyFormat is Required.." })
         if (currencyFormat) {
-            if (currencyFormat.trim().length == 0) return res.status(400).send({ status: false, message: " currencyFormat is Required.." })
-
             if (currencyFormat != "₹") return res.status(400).send({ status: false, message: " currencyFormatis only ₹" })
         }
-        if (!currencyFormat) {
-            data.currencyFormat = "₹"
-        }
+        // if (!currencyFormat) {
+        //     data.currencyFormat = "₹"
+        // }
+
+
         if (isFreeShipping == 0) return res.status(400).send({ status: false, message: "isFreeShipping Box can't be empty..! please add True or False" })
         if (isFreeShipping) {
-            if (!/(?:true|false|True|False)/.test(isFreeShipping)) return res.status(400).send({ status: false, message: "Please add true or false" })
+            if (!/(?:true|false|True|False)/.test(isFreeShipping)) return res.status(400).send({ status: false, message: `isFreeShipping can't be ${isFreeShipping} ..! please add True or False` })
             data.isFreeShipping = isFreeShipping.toLowerCase()
         }
 
+
         let fileData = files[0];
+        if (!fileData) { return res.status(400).send({ msg: "Product Image Not found" }); }
         if (!/([/|.|\w|\s|-])*\.(?:jpg|jpeg|png|JPG|JPEG|PNG)/.test(fileData.originalname)) {
             return res
                 .status(400)
                 .send({ status: false, msg: "productImage is valid only in JPG JPEG PNG." });
         }
-
         if (files && files.length > 0) {
             let uploadedFileURL = await uploadFile(files[0]);
             data.productImage = uploadedFileURL;
@@ -112,14 +114,16 @@ const createProduct = async (req, res) => {
             return res.status(400).send({ msg: "Product Image Not found" });
         }
 
-        if (style) {
-            if (style.trim().length == 0) return res.status(400).send({ status: false, message: "style Box can't be empty..! please add style" })
 
-            if (!reGex.test(style)) return res.status(400).send({ status: false, message: " Style is not valid " })
+        if (style == 0) return res.status(400).send({ status: false, message: "style Box can't be empty..! please add style" })
+        if (style) {
+            if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(style)) return res.status(400).send({ status: false, message: " Style is not valid " })
         }
+
+
         if (availableSizes == 0) { return res.status(400).send({ status: false, msg: "availableSizes should not be empty" }) }
+
         if (availableSizes) {
-            if (!isValidData(availableSizes) || (isFreeShipping.trim().length == 0)) return res.status(400).send({ status: false, message: 'Plz add availableSizes ' })
             data.availableSizes = availableSizes.toUpperCase()
             let check = data.availableSizes.split(" ")
 
@@ -130,21 +134,26 @@ const createProduct = async (req, res) => {
             }
             data.availableSizes = data.availableSizes.split(" ")
         }
+
+
+        if (installments == 0) return res.status(400).send({ status: false, message: " installments is empty" })
+
         if (installments) {
-            if (!isValidData(installments)) return res.status(400).send({ status: false, message: " installments is empty" })
-            if (installments > price) return res.status(400).send({ status: false, message: " installments Should be less than price" })
+            if ((Number(installments)) > price) return res.status(400).send({ status: false, message: " installments Should be less than price" })
 
             if (!(!isNaN(Number(installments)))) {
-                return res.status(400).send({ status: false, message: "Plz, enter valid format of installmentsit should be a number" })
+                return res.status(400).send({ status: false, message: "Plz, enter valid format of installments it should be a number" })
             }
         }
+
+
         const saveData = await productModel.create(data)
         res.status(201).send({ status: true, message: "Product created Successfully", data: saveData })
+
     } catch (error) {
         res.status(500).send({ status: false, message: error.message })
     }
 }
-
 //============================= getProductByfilter ==============================================
 
 const getproductbyfilter = async function (req, res) {
