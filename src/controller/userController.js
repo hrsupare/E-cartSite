@@ -69,13 +69,13 @@ const createUser = async function (req, res) {
         .status(400)
         .send({ status: false, message: "please enter your first Name" });
     }
-    // if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(fname)) {
-    //   return res.status(400).send({
-    //     status: false,
-    //     message: `Heyyy....! ${fname} is not a valid first name`,
-    //   });
-    // }
-    // data.fname = fname.trim().split(" ").filter((word) => word).join(" ");
+    if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(fname)) {
+      return res.status(400).send({
+        status: false,
+        message: `Heyyy....! ${fname} is not a valid first name`,
+      });
+    }
+    data.fname = fname.trim().split(" ").filter((word) => word).join(" ");
 
     //===== validate  lname  ======//
     if (!isValidData(lname)) {
