@@ -152,24 +152,23 @@ const getproductbyfilter = async function (req, res) {
         console.log(requestData)
         //<-----------------------taking filter for searching------------------>//
         const filter = {}
-        if (size.length == 1) {
-            if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(size.toUpperCase())) return res.status(400).send({ status: false, message: "enter valid size" })
+        if (size) {
+            let sizeAll = JSON.parse(size)
+            let sizes = sizeAll.map(x => x.toUpperCase());
+            if (sizes) {
 
-            filter.availableSizes = size.toUpperCase()
-        }
+                for (let i = 0; i < sizes.length; i++) {
+                    if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizes[i]))) {
+                        return res.status(400).send({ status: false, message: `${sizes[i]} is NOT valid Size, Available Sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
+                    }
+                }
 
-        if (size.length > 1) {
-            let sizes = JSON.parse(size)
-            console.log(sizes);
-
-            for (let i = 0; i < sizes.length; i++) {
-                if (!(["S", "XS", "M", "X", "L", "XXL", "XL"].includes(sizes[i].toUpperCase()))) {
-                    return res.status(400).send({ status: false, message: `Available Sizes must be among ${["S", "XS", "M", "X", "L", "XXL", "XL"]}` })
+                if (sizes.length > 0) {
+                    let arrSize = [...sizes]
+                    filter.availableSizes = { $in: arrSize }
                 }
             }
-           
         }
-
         if (name) {
             if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(name)) return res.status(400).send({ status: false, message: "enter valid name" })
             filter.title = name
