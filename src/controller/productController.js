@@ -39,7 +39,6 @@ const isValidData = function (value) {
 };
 //////////----------------------------------------------------------------  
 
-
 //=/=/=/=/=/=/=/=/=/=/=/=/=/=/= createProduct =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
 const createProduct = async (req, res) => {
 
@@ -71,34 +70,23 @@ const createProduct = async (req, res) => {
 
         if (!price || price.trim().length == 0) return res.status(400).send({ status: false, message: " Price is Required.." })
 
+        if (Number(price) <= 0) return res.status(400).send({ status: false, message: " Price is not less than 0 " })
+
         if (!/^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)$/.test(price)) return res.status(400).send({ status: false, message: " Price is in this Format 200 || 200.00" })
 
-        if (currencyId == 0) return res.status(400).send({ status: false, message: "currencyId is Required.." })
-
-        if (currencyId) {
-
-            if (currencyId.toUpperCase() != "INR") return res.status(400).send({ status: false, message: " currencyId is only INR" })
-            data.currencyId = currencyId.toUpperCase()
-        }
-        // if (!currencyId) {
-        //     data.currencyId = "INR"
-        // }
-
-        if (currencyFormat == 0) return res.status(400).send({ status: false, message: " currencyFormat is Required.." })
-        if (currencyFormat) {
-            if (currencyFormat != "₹") return res.status(400).send({ status: false, message: " currencyFormatis only ₹" })
-        }
-        // if (!currencyFormat) {
-        //     data.currencyFormat = "₹"
-        // }
-
+        
+        if (!currencyId) return res.status(400).send({ status: false, message: " currencyId is Required.." })
+        
+        if (currencyId != "INR") return res.status(400).send({ status: false, message: " currencyId is only INR" })
+        if (!currencyFormat) return res.status(400).send({ status: false, message: " currencyFormat is Required.." })
+        
+        if (currencyFormat != "₹") return res.status(400).send({ status: false, message: " currencyFormat is only ₹" })
 
         if (isFreeShipping == 0) return res.status(400).send({ status: false, message: "isFreeShipping Box can't be empty..! please add True or False" })
         if (isFreeShipping) {
             if (!/(?:true|false|True|False)/.test(isFreeShipping)) return res.status(400).send({ status: false, message: `isFreeShipping can't be ${isFreeShipping} ..! please add True or False` })
             data.isFreeShipping = isFreeShipping.toLowerCase()
         }
-
 
         let fileData = files[0];
         if (!fileData) { return res.status(400).send({ msg: "Product Image Not found" }); }
@@ -120,7 +108,6 @@ const createProduct = async (req, res) => {
             if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(style)) return res.status(400).send({ status: false, message: " Style is not valid " })
         }
 
-
         if (availableSizes == 0) { return res.status(400).send({ status: false, msg: "availableSizes should not be empty" }) }
 
         if (availableSizes) {
@@ -135,17 +122,16 @@ const createProduct = async (req, res) => {
             data.availableSizes = data.availableSizes.split(" ")
         }
 
-
         if (installments == 0) return res.status(400).send({ status: false, message: " installments is empty" })
 
         if (installments) {
-            if ((Number(installments)) > price) return res.status(400).send({ status: false, message: " installments Should be less than price" })
+            if (Number(installments) < 0) return res.status(400).send({ status: false, message: " installments is not less than 0 " })
+            if ((Number(installments)) >= Number(price)) return res.status(400).send({ status: false, message: " installments Should be less than price" })
 
             if (!(!isNaN(Number(installments)))) {
                 return res.status(400).send({ status: false, message: "Plz, enter valid format of installments it should be a number" })
             }
         }
-
 
         const saveData = await productModel.create(data)
         res.status(201).send({ status: true, message: "Product created Successfully", data: saveData })

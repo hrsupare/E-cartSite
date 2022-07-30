@@ -189,11 +189,11 @@ const createUser = async function (req, res) {
         .send({ status: false, msg: "please add  address details  " });
     }
     try {
-      
+      console.log(data.address)
       data.address = JSON.parse(data.address);
       
     } catch {
-      return res.status(400).send({ message: "please enter Valid pincode" });
+      return res.status(400).send({ message: "please enter Valid address in object! something is wrong" });
     } 
     if(!data.address.shipping){
       return res
@@ -374,7 +374,7 @@ const updateUserDetail = async (req, res) => {
   try {
 
     const userId = req.params.userId
-    const data = req.body
+    var data = req.body
     const files = req.files;
 
 
