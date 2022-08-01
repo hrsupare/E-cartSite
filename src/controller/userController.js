@@ -122,6 +122,7 @@ const createUser = async function (req, res) {
 
     //===== validate and uplode profile photo ======//
     let fileData = files[0];
+    console.log(fileData)
     if (files.length == 0) {
       return res.status(400).send({ message: "No Profile image found" });
     }
@@ -193,7 +194,7 @@ const createUser = async function (req, res) {
       data.address = JSON.parse(data.address);
       
     } catch {
-      return res.status(400).send({ message: "please enter Valid address in object! something is wrong" });
+      return res.status(400).send({ message: " please enter valid details or valid pincode" });
     } 
     if(!data.address.shipping){
       return res
