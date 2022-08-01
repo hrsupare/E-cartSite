@@ -1,8 +1,8 @@
-const express = require("express");
+module.exports = router;
 const router = express.Router();
 const { getUser, createUser, loginUser, updateUserDetail } = require("../controller/userController")
-const { createProduct, getproductbyfilter, getProductById,updateProductDetail, deleteProductById } = require("../controller/productController")
 const { authenticate } = require("../middleware/auth")
+const { getproductbyfilter, createProduct, getProductById, updateProductDetail, deleteProductById } = require("../controller/productController")
 
 //==================== User ==============================//
 
