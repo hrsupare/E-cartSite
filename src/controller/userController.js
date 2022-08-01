@@ -56,11 +56,7 @@ const createUser = async function (req, res) {
     let data = req.body;
 
     const { fname, lname, email, phone, password } = data;
-    try {
-      data.address = JSON.parse(data.address);
-    } catch {
-      return res.status(400).send({ msg: "please enter Valid pincode" });
-    }
+
 
     let files = req.files;
     //===== validate body ======//
@@ -191,15 +187,22 @@ const createUser = async function (req, res) {
 
     // console.log(data)
     //===== validate address ======//
+    try {
+      data.address = JSON.parse(data.address);
+    } catch {
+      return res.status(400).send({ msg: "please enter  valid details || valid pincode" });
+    }
+
+
     if (!data.address) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add  address details  " });
+        .send({ status: false, msg: "please add address details" });
     }
     if (!data.address.shipping) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add  shipping details  " });
+        .send({ status: false, msg: "please add shipping details" });
     }
     if (
       !isValidData(data.address.shipping.street) ||

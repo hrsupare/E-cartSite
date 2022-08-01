@@ -80,14 +80,22 @@ const createProduct = async (req, res) => {
 
         if (!/^[+-]?([0-9]+\.?[0-9]*|\.[0-9]+)$/.test(price)) return res.status(400).send({ status: false, message: " Price is in this Format 200 || 200.00" })
 
-        if (!currencyId) return res.status(400).send({ status: false, message: " currencyId is Required.." })
+        //if (!currencyId) return res.status(400).send({ status: false, message: " currencyId is Required.." })
+        if (currencyId) {
+            if (!/(?:INR|inr)/.test(currencyId)) return res.status(400).send({ status: false, message: " currencyId is only INR" })
+        }
+        if (!currencyId) {
+            data.currencyId = currencyId.toLowerCase()
 
-        if (!/(?:INR|inr)/.test(currencyId)) return res.status(400).send({ status: false, message: " currencyId is only INR" })
-        data.currencyId = currencyId.toLowerCase()
+        }
+        //if (!currencyFormat) return res.status(400).send({ status: false, message: " currencyFormat is Required.." })
 
-        if (!currencyFormat) return res.status(400).send({ status: false, message: " currencyFormat is Required.." })
-
-        if (currencyFormat != "₹") return res.status(400).send({ status: false, message: " currencyFormat is only ₹" })
+        if (currencyFormat) {
+            if (currencyFormat != "₹") return res.status(400).send({ status: false, message: " currencyFormat is only ₹" })
+        }
+        if (!currencyFormat) {
+            data.currencyFormat = "₹"
+        }
 
         if (isFreeShipping == 0) return res.status(400).send({ status: false, message: "isFreeShipping Box can't be empty..! please add True or False" })
 
@@ -310,21 +318,21 @@ const updateProductDetail = async function (req, res) {
             }
         }
 
-        //-------  currencyId------- 
-        if (currencyId != "INR") {
-            return res.status(400).send({ status: false, message: 'currencyId should be a INR' })
-        }
-        if (!currencyId) {
-            data.currencyId = "INR"
+        //-------  currencyId------
+        if (currencyId) {
+            if (currencyId != "INR") {
+                return res.status(400).send({ status: false, message: 'currencyId should be a INR' })
+            }
         }
 
-        //---------  currencyFormat-------       
-        if (currencyFormat != "₹") {
-            return res.status(400).send({ status: false, message: "Please provide currencyFormat in format ₹ only" })
+
+        //---------  currencyFormat-------   
+        if (currencyFormat) {
+            if (currencyFormat != "₹") {
+                return res.status(400).send({ status: false, message: "Please provide currencyFormat in format ₹ only" })
+            }
         }
-        if (!currencyFormat) {
-            data.currencyFormat = "₹"
-        }
+
 
         //---------  isFreeShipping------- 
         if (isFreeShipping == 0) return res.status(400).send({ status: false, msg: "isFreeShipping should not be empty" })

@@ -1,4 +1,4 @@
-module.exports = router;
+const express = require('express')
 const router = express.Router();
 const { getUser, createUser, loginUser, updateUserDetail } = require("../controller/userController")
 const { authenticate } = require("../middleware/auth")
