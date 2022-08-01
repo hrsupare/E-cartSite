@@ -49,6 +49,8 @@ const isValidData = function (value) {
 
 
 //============================================= create user =====================================//
+
+
 const createUser = async function (req, res) {
   try {
     let data = req.body;
@@ -59,6 +61,7 @@ const createUser = async function (req, res) {
     } catch {
       return res.status(400).send({ msg: "please enter Valid pincode" });
     }
+
     let files = req.files;
     //===== validate body ======//
     if (!isValidRequestBody(data)) {
@@ -100,7 +103,7 @@ const createUser = async function (req, res) {
       return res.status(400).send({ status: false, msg: "please enter email" });
     }
     if (
-      !/^\s*[a-zA-Z][a-zA-Z0-9\.]([-\.\_\+][a-zA-Z0-9]+)\@[a-zA-Z]+(\.[a-zA-Z]{2,5})+\s*$/.test(
+      !/^\s*[a-zA-Z][a-zA-Z0-9]*([-\.\_\+][a-zA-Z0-9]+)*\@[a-zA-Z]+(\.[a-zA-Z]{2,5})+\s*$/.test(
         email
       )
     ) {
@@ -177,7 +180,7 @@ const createUser = async function (req, res) {
       });
     }
     if (!/^[a-zA-Z0-9@*&$#!]{8,15}$/.test(password)) {
-      return res.status(400).send({ 
+      return res.status(400).send({
         status: false,
         msg: "please enter valid password max 8 or min 15 digit",
       });
@@ -187,16 +190,28 @@ const createUser = async function (req, res) {
     const hash = bcrypt.hashSync(password, saltRounds);
     data.password = hash;
 
+
+    // console.log(data)
     //===== validate address ======//
+    if (!data.address) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "please add  address details  " });
+    }
+    if (!data.address.shipping) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "please add  shipping details  " });
+    }
     if (
       !isValidData(data.address.shipping.street) ||
-      !/^\s*([\w]+([\s\.\-\:\,][a-zA-Z0-9\s]+)){2,64}\s$/.test(
+      !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(
         data.address.shipping.street
       )
     ) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add valid street" });
+        .send({ status: false, msg: "please add valid shipping street" });
     }
 
     if (
@@ -205,7 +220,7 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add valid city" });
+        .send({ status: false, msg: "please add valid shipping city" });
     }
 
     if (
@@ -214,18 +229,23 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add valid pincode" });
+        .send({ status: false, msg: "please add valid shipping pincode" });
     }
 
+    if (!data.address.billing) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "please add   billing details  " });
+    }
     if (
       !isValidData(data.address.billing.street) ||
-      !/^\s*([\w]+([\s\.\-\:\,][a-zA-Z0-9\s]+)){2,64}\s$/.test(
+      !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(
         data.address.billing.street
       )
     ) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add valid street" });
+        .send({ status: false, msg: "please add valid billing street" });
     }
 
     if (
@@ -234,7 +254,7 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add valid city" });
+        .send({ status: false, msg: "please add valid billing city" });
     }
 
     if (
@@ -243,7 +263,7 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add valid pincode" });
+        .send({ status: false, msg: "please add valid billing pincode" });
     }
     //===== create user ======//
     let createUserDoc = await userModel.create(data);
@@ -293,7 +313,7 @@ let loginUser = async function (req, res) {
         message: "password length should be in between 8 to 15",
       });
     }
-    console.log(data)
+
     let userData = await userModel.findOne({ email: email1 });
     console.log(userData)
     if (!userData) {
@@ -331,6 +351,8 @@ const isValidObjectId = function (objectId) {
   return false;
 }
 
+//============================================= get user =====================================//
+
 const getUser = async function (req, res) {
   try {
     let userId = req.params.userId
@@ -357,6 +379,8 @@ const getUser = async function (req, res) {
 }
 
 
+//=============================================  update user =====================================//
+
 const updateUserDetail = async (req, res) => {
 
   try {
@@ -367,7 +391,7 @@ const updateUserDetail = async (req, res) => {
 
 
     //aws uplode
-   
+
     if (files && files.length > 0) {
       let uploadedFileURL = await uploadFile(files[0]);
       data.profileImage = uploadedFileURL;
@@ -436,7 +460,7 @@ const updateUserDetail = async (req, res) => {
         data.address = JSON.parse(data.address);
       } catch {
         return res.status(400).send({ msg: "please enter Valid pincode" });
-      }  
+      }
       address = JSON.parse(address)
 
       if (!isValidData(address.shipping.street) || !/^([a-zA-Z 0-9\S]+)$/.test(address.shipping.street)
@@ -463,6 +487,10 @@ const updateUserDetail = async (req, res) => {
     }
 
     data.address = address
+
+
+
+
     let up = await userModel.findOneAndUpdate({ _id: userId }, data, { new: true })
     res.status(200).send({ status: false, message: up })
   } catch (error) {
