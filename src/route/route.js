@@ -3,7 +3,7 @@ const router=express.Router();
 const{getUser,createUser,loginUser,updateUserDetail} =require("../controller/userController")
 const {authenticate} =require("../middleware/auth")
 const {getproductbyfilter,createProduct,getProductById,updateProductDetail,deleteProductById} =require("../controller/productController")
-
+const{createCart} =require("../controller/cartController")
 
 
 router.post('/register',createUser)
@@ -16,6 +16,8 @@ router.get('/products',getproductbyfilter)
 router.get('/products/:productId',getProductById)
 router.put('/products/:productId',updateProductDetail)
 router.delete('/products/:productId',deleteProductById)
+//=======================================================================================================
+router.post('/users/:userId/cart',createCart )
 
 
 
