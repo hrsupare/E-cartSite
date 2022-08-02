@@ -14,9 +14,9 @@ const createCart = async (req, res) => {
 
         const uniqueUser = await cartModel.findOne({ userId: userId })
         if (uniqueUser) {
-            console.log(uniqueUser)
-            const { productId, quantity, cartId } = data
-            let add = {}
+           // console.log(uniqueUser)
+            let { productId, quantity, cartId } = data
+           // let add = {}
             if (!cartId) return res.status(400).send({ status: false, message: "Please add cartId in reqbody as user have cart already" })
             if (!mongoose.isValidObjectId(cartId)) {
                 return res.status(400).send({ status: false, message: "Please add The Valid cartId" })
@@ -24,36 +24,39 @@ const createCart = async (req, res) => {
             if (!mongoose.isValidObjectId(productId)) {
                 return res.status(400).send({ status: false, message: "Please add The Valid productId" })
             }
-
+            if(quantity){
+                if (!/^([1-9]\d*)$/.test(quantity)) return res.status(400).send({ status: false, message: "enter valid quantity" })
+            }else{
+                quantity = 1
+            }
             if (productId) {
                 for (let i = 0; i < uniqueUser.items.length; i++) {
                     if (productId == uniqueUser.items[i].toString()) {
+                        console.log(productId)
                         let products = await productModel.findOne({ _id: productId }, { isDeleted: false })
-                        add.totalPrice = uniqueUser.totalPrice + products.price
-                        add.totalItems = uniqueUser.items.length + 1
-                        add.items = { $push: { items: productId } }
-                        console.log(add)
-                        const saveData = await cartModel.findOneAndUpdate({ _id: cartId }, add, { new: true })
+                        uniqueUser.items[i].quantity+=quantity
+                        uniqueUser.totalPrice+= products.price*quantity
+                        uniqueUser.totalItems =uniqueUser.items.length
+                        uniqueUser.items.push({productId,quantity})
+                        
+                        const saveData = await cartModel.findOneAndUpdate({ _id: cartId }, uniqueUser, { new: true })
                         //console.log(saveData)
-                        res.status(200).send({ status: true, message: "Cart updated Successfully", data: saveData })
+                       return res.status(200).send({ status: true, message: "product updated Successfully", data: saveData })
                     } else {
                         let products = await productModel.findOne({ _id: productId }, { isDeleted: false })
-                       
+                        uniqueUser.totalPrice+= products.price*quantity
+                        uniqueUser.totalItems =uniqueUser.items.length
+                        uniqueUser.items.push({productId,quantity})
 
-
-                        add.totalPrice = uniqueUser.totalPrice + products.price
-                        add.totalItems = uniqueUser.items.length + 1
-                        add.items = { $push: { items: productId } }
-                        console.log(add)
-                        const saveData = await cartModel.findOneAndUpdate({ _id: cartId }, add, { new: true })
+                        const saveData = await cartModel.findOneAndUpdate({ _id: cartId }, uniqueUser, { new: true })
                         //console.log(saveData)
-                        res.status(200).send({ status: true, message: "Cart updated Successfully", data: saveData })
+                       return res.status(200).send({ status: true, message: "product updated Successfully", data: saveData })
                     }
                 }
             }
         }
             else {
-                const { productId, quantity } = data
+                let { productId, quantity } = data
                 data.userId = userId
                 let items = []
                 let obj = {}
@@ -82,7 +85,7 @@ const createCart = async (req, res) => {
                 if (!products) return res.status(400).send({ status: false, message: "add products in cart" })
                 console.log(products)
 
-                data.totalPrice = products.price
+                data.totalPrice = products.price 
                 data.totalItems = items.length
 
                 console.log(data)
