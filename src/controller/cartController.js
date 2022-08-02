@@ -14,72 +14,72 @@ const createCart = async (req, res) => {
 
         const uniqueUser = await cartModel.findOne({ userId: userId })
         if (uniqueUser) {
-            const { items, cartId } = data
+            console.log(uniqueUser )
+            const {productId,quantity,cartId}=data
+            let add={}
+            if (!cartId) return res.status(400).send({ status: false, message: "Please add cartId in reqbody as user have cart already" })
             if (!mongoose.isValidObjectId(cartId)) {
                 return res.status(400).send({ status: false, message: "Please add The Valid cartId" })
             }
-            if (!cartId) return res.status(400).send({ status: false, message: "Please add cartId in reqbody as user have cart already" })
-            let totalprice = 0
-            let array = []
-            let quantity = []
-            for (let i = 0; i < items.length; i++) {
-                if (!mongoose.isValidObjectId(items[i].productId)) {
-                    return res.status(400).send({ status: false, message: "Please add The Valid productId" })
-                }
-                array.push(items[i].productId)
-                if (!/^([1-9]\d*)$/.test(items[i].quantity)) return res.status(400).send({ status: false, message: "enter valid quantity" })
-                quantity.push(items[i].quantity)
+            if (!mongoose.isValidObjectId(productId)) {
+                return res.status(400).send({ status: false, message: "Please add The Valid productId" })
             }
+        
+        let products = await productModel.findOne({ _id:productId}, { isDeleted: false })
+        if (!products) return res.status(400).send({ status: false, message: "add products in cart" })
+       
 
-            let products = await productModel.find({ _id: { $in: array } }, { isDeleted: false })
-            if (products.length == 0) return res.status(400).send({ status: false, message: "add products in cart" })
-            for (let i = 0; i < items.length; i++) {
-                totalprice += products[i].price * quantity[i]
-            }
-            //console.log(totalprice)
-
-            data.totalPrice = totalprice
-            data.totalItems = items.length
-            //   console.log(data)
-            const saveData = await cartModel.findOneAndUpdate({ _id: cartId }, data, { new: true })
-            //console.log(saveData)
-            res.status(200).send({ status: true, message: "Cart updated Successfully", data: saveData })
-
-        }
+        add.totalPrice = products.price
+        add.totalItems = uniqueUser.items.length
+        add.items= {$push:{items:productId}}
+           console.log(add)
+        const saveData = await cartModel.findOneAndUpdate({ _id: cartId },add,{ new: true })
+        //console.log(saveData)
+        res.status(200).send({ status: true, message: "Cart updated Successfully", data: saveData })
+         }
+    
         else {
-            const { items } = data
-            data.userId = userId
-            let totalprice = 0
-            let array = []
-            let quantity = []
-            for (let i = 0; i < items.length; i++) {
-                if (!mongoose.isValidObjectId(items[i].productId)) {
-                    return res.status(400).send({ status: false, message: "Please add The Valid productId" })
-                }
-                array.push(items[i].productId)
-                if (!/^([1-9]\d*)$/.test(items[i].quantity)) return res.status(400).send({ status: false, message: "enter valid quantity" })
-                quantity.push(items[i].quantity)
-            }
-
-            let products = await productModel.find({ _id: { $in: array } }, { isDeleted: false })
-            if (products.length == 0) return res.status(400).send({ status: false, message: "add products in cart" })
-            for (let i = 0; i < items.length; i++) {
-                totalprice += products[i].price * quantity[i]
-            }
-            //console.log(totalprice)
-
-            data.totalPrice = totalprice
-            data.totalItems = items.length
-
-
-            const saveData = await cartModel.create(data)
-            //console.log(saveData)
-            res.status(201).send({ status: true, message: "Cart created Successfully", data: saveData })
+        const {productId,quantity}=data
+         data.userId = userId
+         let items=[]
+         let obj={}
+         
+        if (!mongoose.isValidObjectId(productId)) {
+            return res.status(400).send({ status: false, message: "Please add The Valid productId" })
         }
-    } catch (err) {
-        res.status(500).send({ status: false, message: err.message })
+        if(productId){
+                obj.productId=productId
+               // items.push(obj)
+                data.items=items
+                delete data.productId
+        }
 
+        console.log(data)
+        if (quantity) {
+            if (!/^([1-9]\d*)$/.test(quantity)) return res.status(400).send({ status: false, message: "enter valid quantity" })
+            obj.quantity=quantity
+            items.push(obj)
+        } else{
+            obj.quantity= 1
+            items.push(obj)
+        }
+console.log(data)
+    let products = await productModel.findOne({ _id: productId }, { isDeleted: false })
+    if (!products) return res.status(400).send({ status: false, message: "add products in cart" })
+    console.log(products)
+    
+    data.totalPrice = products.price
+    data.totalItems = items.length
 
+   console.log(data)
+    const saveData = await cartModel.create(data)
+    //console.log(saveData)
+    res.status(201).send({ status: true, message: "Cart created Successfully", data: saveData })
     }
+ } catch (err) {
+    res.status(500).send({ status: false, message: err.message })
+
+
+}
 }
 module.exports = { createCart }
