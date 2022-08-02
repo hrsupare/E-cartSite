@@ -125,6 +125,7 @@ const createUser = async function (req, res) {
 
     //===== validate and uplode profile photo ======//
     let fileData = files[0];
+    console.log(fileData)
     if (files.length == 0) {
       return res.status(400).send({ message: "No Profile image found" });
     }
@@ -332,7 +333,7 @@ let loginUser = async function (req, res) {
       {
         userId: userId,
         project: "Products Management",
-      }, "group71-project5", { expiresIn: '30m' },
+      }, "group71-project5", { expiresIn: '200m' },
 
     );
 
