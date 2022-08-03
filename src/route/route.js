@@ -30,7 +30,7 @@ router.delete("/products/:productId", deleteProductById)
 
 //==================== Cart ===============================//
 
-router.post("/users/:userId/cart", createCart)
+router.post("/users/:userId/cart",authenticate, createCart)
 
 router.put("/users/:userId/cart", authenticate, updateCart)
 
