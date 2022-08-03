@@ -199,7 +199,7 @@ const updateCart = async function (req, res) {
 
         console.log(cartData)
         const updateCartData = await cartModel.findByIdAndUpdate({ _id: cartId }, cartData, { new: true })
-        return res.status(200).send({ status: true, message: 'cart details updated successfully.', data: updateCartData });
+         return res.status(200).send({ status: true, message: 'cart details updated successfully.', data: updateCartData });
     }
     catch (error) {
         return res.status(500).send({ status: false, message: error.message })

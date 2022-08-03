@@ -333,7 +333,7 @@ let loginUser = async function (req, res) {
       {
         userId: userId,
         project: "Products Management",
-      }, "group71-project5", { expiresIn: '200m' },
+      }, "group71-project5", { expiresIn: '7d' },
 
     );
 
