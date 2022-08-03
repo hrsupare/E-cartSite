@@ -49,12 +49,15 @@ const isValidData = function (value) {
 
 
 //============================================= create user =====================================//
+
+
 const createUser = async function (req, res) {
   try {
     let data = req.body;
 
     const { fname, lname, email, phone, password } = data;
- 
+
+
     let files = req.files;
     //===== validate body ======//
     if (!isValidRequestBody(data)) {
@@ -96,7 +99,7 @@ const createUser = async function (req, res) {
       return res.status(400).send({ status: false, message: "please enter email" });
     }
     if (
-      !/[a-z0-9]+@[a-z]+\.[a-z]{2,3}/.test(
+      !/^\s*[a-zA-Z][a-zA-Z0-9]*([-\.\_\+][a-zA-Z0-9]+)*\@[a-zA-Z]+(\.[a-zA-Z]{2,5})+\s*$/.test(
         email
       )
     ) {
@@ -136,7 +139,7 @@ const createUser = async function (req, res) {
     if (files && files.length > 0) {
       let uploadedFileURL = await uploadFile(files[0]);
       data.profileImage = uploadedFileURL;
-    } 
+    }
 
     //===== validate phone ======//
     if (!isValidData(phone)) {
@@ -182,29 +185,25 @@ const createUser = async function (req, res) {
     const hash = bcrypt.hashSync(password, saltRounds);
     data.password = hash;
 
+
+    // console.log(data)
     //===== validate address ======//
-    //===== validate address ======//
-    if (!data.address || data.address.trim().length==0) {
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add  address details  " });
-    }
     try {
-      console.log(data.address)
       data.address = JSON.parse(data.address);
-      
     } catch {
-      return res.status(400).send({ message: " please enter valid details or valid pincode" });
-    } 
-    if(!data.address.shipping){
-      return res
-        .status(400)
-        .send({ status: false, msg: "please add shipping details  " });
+      return res.status(400).send({ msg: "please enter  valid details || valid pincode" });
     }
-    if(!data.address.billing){
+
+
+    if (!data.address) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add billing details  " });
+        .send({ status: false, msg: "please add address details" });
+    }
+    if (!data.address.shipping) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "please add shipping details" });
     }
     if (
       !isValidData(data.address.shipping.street) ||
@@ -214,7 +213,7 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, message: "please add valid shipping street" });
+        .send({ status: false, msg: "please add valid shipping street" });
     }
 
     if (
@@ -223,7 +222,7 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, message: "please add valid shipping city" });
+        .send({ status: false, msg: "please add valid shipping city" });
     }
 
     if (
@@ -232,16 +231,23 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, message: "please add valid shipping pincode" });
+        .send({ status: false, msg: "please add valid shipping pincode" });
     }
 
+    if (!data.address.billing) {
+      return res
+        .status(400)
+        .send({ status: false, msg: "please add   billing details  " });
+    }
     if (
       !isValidData(data.address.billing.street) ||
-      !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(data.address.billing.street)
+      !/^\s*[a-zA-Z0-9 .,-:]{2,}\s*$/.test(
+        data.address.billing.street
+      )
     ) {
       return res
         .status(400)
-        .send({ status: false, message: "please add valid billing street" });
+        .send({ status: false, msg: "please add valid billing street" });
     }
 
     if (
@@ -250,7 +256,7 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, message: "please add valid billing city" });
+        .send({ status: false, msg: "please add valid billing city" });
     }
 
     if (
@@ -259,7 +265,7 @@ const createUser = async function (req, res) {
     ) {
       return res
         .status(400)
-        .send({ status: false, message: "please add valid billing pincode" });
+        .send({ status: false, msg: "please add valid billing pincode" });
     }
     //===== create user ======//
     let createUserDoc = await userModel.create(data);
@@ -309,7 +315,7 @@ let loginUser = async function (req, res) {
         message: "password length should be in between 8 to 15",
       });
     }
-    console.log(data)
+
     let userData = await userModel.findOne({ email: email1 });
     console.log(userData)
     if (!userData) {
@@ -327,8 +333,8 @@ let loginUser = async function (req, res) {
       {
         userId: userId,
         project: "Products Management",
-      },"group71-project5",{expiresIn:'30m'},
-      
+      }, "group71-project5", { expiresIn: '200m' },
+
     );
 
     {
@@ -343,6 +349,8 @@ const isValidObjectId = function (objectId) {
   if (mongoose.Types.ObjectId.isValid(objectId)) return true;
   return false;
 }
+
+//============================================= get user =====================================//
 
 const getUser = async function (req, res) {
   try {
@@ -369,6 +377,8 @@ const getUser = async function (req, res) {
 
 }
 
+
+//=============================================  update user =====================================//
 
 const updateUserDetail = async (req, res) => {
 
@@ -452,7 +462,7 @@ const updateUserDetail = async (req, res) => {
       try {
         data.address = JSON.parse(data.address);
       } catch {
-        return res.status(400).send({ message: "please enter Valid pincode" });
+        return res.status(400).send({ msg: "please enter Valid pincode" });
       }
       address = JSON.parse(address)
 
@@ -481,6 +491,10 @@ const updateUserDetail = async (req, res) => {
     }
 
     data.address = address
+
+
+
+
     let up = await userModel.findOneAndUpdate({ _id: userId }, data, { new: true })
     res.status(200).send({ status: false, message: up })
   } catch (error) {

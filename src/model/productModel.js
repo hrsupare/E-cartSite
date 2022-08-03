@@ -6,12 +6,13 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
-            trim:true
+            lowercase: true,
+            trim: true
         },
         description: {
             type: String,
             required: true,
-            trim:true
+            trim: true
         },
         price: {
             type: Number,
@@ -35,7 +36,7 @@ const productSchema = new mongoose.Schema(
         },
         style: {
             type: String,
-            trim:true
+            trim: true
         },
         availableSizes: {
             type: [String],
