@@ -4,7 +4,7 @@ const productModel = require("../model/productModel");
 const mongoose = require("mongoose");
 
 const createCart = async (req, res) => {
-    try {
+    // try {
         const userId = req.params.userId
         if (!mongoose.isValidObjectId(userId)) {
             return res.status(400).send({ status: false, message: "Please add The Valid userId" })
@@ -12,11 +12,17 @@ const createCart = async (req, res) => {
         var data = req.body;
         if (!Object.keys(data).length) return res.status(400).send({ status: false, message: "body is Required.." })
 
-        const uniqueUser = await cartModel.findOne({ userId: userId })
+        const uniqueUser = await cartModel.findOne({userId:userId})
+        console.log(uniqueUser)
+        if (uniqueUser.userId != userId){
+            return res.status(404).send({ status: false, message: `Heeyyy... user! ${userId} this cartId is not belongs to Logged In user` })
+        }
         if (uniqueUser) {
-           // console.log(uniqueUser)
+            console.log(uniqueUser)
+            console.log(uniqueUser.items,uniqueUser.items.length)
+           // if(uniqueUser.userId !==  userId) 
             let { productId, quantity, cartId } = data
-           // let add = {}
+           
             if (!cartId) return res.status(400).send({ status: false, message: "Please add cartId in reqbody as user have cart already" })
             if (!mongoose.isValidObjectId(cartId)) {
                 return res.status(400).send({ status: false, message: "Please add The Valid cartId" })
@@ -29,15 +35,18 @@ const createCart = async (req, res) => {
             }else{
                 quantity = 1
             }
+            console.log(productId)
             if (productId) {
                 for (let i = 0; i < uniqueUser.items.length; i++) {
-                    if (productId == uniqueUser.items[i].toString()) {
+                    console.log(productId )
+                    console.log(uniqueUser.items[i].productId.toString())
+                    if (productId == uniqueUser.items[i].productId.toString()) {
                         console.log(productId)
                         let products = await productModel.findOne({ _id: productId }, { isDeleted: false })
                         uniqueUser.items[i].quantity+=quantity
                         uniqueUser.totalPrice+= products.price*quantity
                         uniqueUser.totalItems =uniqueUser.items.length
-                        uniqueUser.items.push({productId,quantity})
+                       
                         
                         const saveData = await cartModel.findOneAndUpdate({ _id: cartId }, uniqueUser, { new: true })
                         //console.log(saveData)
@@ -93,10 +102,11 @@ const createCart = async (req, res) => {
                 //console.log(saveData)
                 res.status(201).send({ status: true, message: "Cart created Successfully", data: saveData })
             }
-        } catch (err) {
-            res.status(500).send({ status: false, message: err.message })
+        //  } 
+        // catch (err) {
+        //     res.status(500).send({ status: false, message: err.message })
 
 
-        }
+        // }
     }
 module.exports = { createCart }
