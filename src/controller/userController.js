@@ -295,7 +295,7 @@ let loginUser = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Please provide Password" });
     }
-    if (!/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email1)) {
+    if (!/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email1)) {
       return res.status(400).send({
         status: false,
         message: "Email should be valid email address",

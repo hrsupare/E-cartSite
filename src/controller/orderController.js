@@ -112,7 +112,7 @@ exports.updateOrder = async function (req, res) {
         const userdb = await userModel.findOne({ _id: userId })
         if (!userdb) return res.status(404).send({ status: false, message: "user is not present" })
 
-        if (req.userDetail.userId != userId) return res.status(403).send({ status: false, message: "user not Authorized to place order of diff user" })
+        if (req.userDetail.userId != userId) return res.status(403).send({ status: false, message: "user not Authorized to place order " })
         if (!orderId) return res.status(400).send({ status: false, message: "please enter orderId in body" })
         if (!mongoose.isValidObjectId(orderId)) return res.status(400).send({ status: false, message: "please enter valid OrderId " })
 
