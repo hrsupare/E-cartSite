@@ -98,18 +98,10 @@ const createUser = async function (req, res) {
     if (!isValidData(email)) {
       return res.status(400).send({ status: false, message: "please enter email" });
     }
-    if (
-      !/^\s*[a-zA-Z][a-zA-Z0-9]*([-\.\_\+][a-zA-Z0-9]+)*\@[a-zA-Z]+(\.[a-zA-Z]{2,5})+\s*$/.test(
-        email
-      )
-    ) {
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: `Heyyy....! ${email} is not a valid email`,
-        });
+    if (!/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email)) {
+      return res.status(400).send({ status: false, message: `Heyyy....! ${email} is not a valid email` });
     }
+
 
     let checkEmail = await userModel.findOne({ email: email });
     if (checkEmail) {

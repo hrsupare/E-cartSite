@@ -3,7 +3,10 @@ const router = express.Router();
 const { getUser, createUser, loginUser, updateUserDetail } = require("../controller/userController")
 const { authenticate } = require("../middleware/auth")
 const { getproductbyfilter, createProduct, getProductById, updateProductDetail, deleteProductById } = require("../controller/productController")
-const { createCart,updateCart } = require("../controller/cartController")
+const { createCart, updateCart, getCart, deleteCart } = require("../controller/cartController")
+const { createOrder, updateOrder } = require("../controller/orderController")
+
+
 //==================== User ==============================//
 
 router.post('/register', createUser)
@@ -31,6 +34,16 @@ router.delete("/products/:productId", deleteProductById)
 router.post("/users/:userId/cart",authenticate, createCart)
 
 router.put("/users/:userId/cart", authenticate, updateCart)
+
+router.get('/users/:userId/cart',authenticate, getCart)
+
+router.delete('/users/:userId/cart',authenticate, deleteCart)
+
+//=========================== FEATURE - 4 ORDER =========================================//
+
+router.post("/users/:userId/orders", authenticate, createOrder)
+
+router.put("/users/:userId/orders",authenticate, updateOrder)
 
 
 
