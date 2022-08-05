@@ -2,8 +2,6 @@ const userModel = require("../model/userModel")
 const cartModel = require("../model/cartModel")
 const productModel = require("../model/productModel")
 const mongoose = require("mongoose")
-const ObjectId = mongoose.Schema.Types.ObjectId
-
 
 // <====================== createCart =========================>
 
@@ -14,7 +12,7 @@ const createCart = async (req, res) => {
         let data = req.body
         const { productId } = data
 
-        if (!productId) return res.status(400).send({ status: false, message: "productId is Required.." })
+        if (!productId || productId.trim().length == 0) return res.status(400).send({ status: false, message: "productId is Required.." })
 
         if (userId == 0) return res.status(400).send({ status: false, message: "userId is empty.." })
         if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "userId is not Valid ObjectId.." })
@@ -25,8 +23,9 @@ const createCart = async (req, res) => {
 
         //// /------------------------------authorisation-----------------------------------
 
-        if (userId != req.userDetail.userId)
+        if (userId != req.userDetail)
             return res.status(403).send({ status: false, message: "you are not Authorised" })
+
         ///// /-------------------------------------------------------------------------------
 
         if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "ProductId is not Valid ObjectId.." })
@@ -37,6 +36,7 @@ const createCart = async (req, res) => {
         if (!newCart) {
 
             let findproduct = await productModel.findOne({ _id: productId, isDeleted: false })
+            console.log(findproduct)
             if (!findproduct) return res.status(404).send({ status: false, message: " Product not found" })
 
             let addCart = {
@@ -59,7 +59,8 @@ const createCart = async (req, res) => {
 
         if (newCart) {
 
-            let findproduct = await productModel.findOne({ _id: productId })
+            let findproduct = await productModel.findOne({ _id: productId, isDeleted: false })
+            console.log(findproduct)
             if (!findproduct) return res.status(404).send({ status: false, message: " Product not found" })
             // console.log(findproduct, 55)
 
@@ -104,7 +105,7 @@ const updateCart = async function (req, res) {
         }
 
         //<-------- Authorisation ------------------>
-        if (userId != req.userDetail.userId) {
+        if (userId != req.userDetail) {
             return res.status(403).send({ status: false, message: `Heeyyy...Spam! you are not authorised to update the cart Items` })
         }
 
@@ -230,7 +231,9 @@ const getCart = async function (req, res) {
         let findUser = await userModel.findOne({ _id: userId })
         if (!findUser) { return res.status(404).send({ status: false, message: " User not Found" }) }
 
-        if (userId != req.userDetail.userId) { return res.status(403).send({ status: false, message: "you are not Authorised" }) }
+        //<-------- Authorisation ------------------>
+        if (userId != req.userDetail) { return res.status(403).send({ status: false, message: "you are not Authorised" }) }
+        //<----------------------------------------->
 
         let checkCart = await cartModel.findOne({ userId: userId })
         console.log(checkCart)
@@ -256,7 +259,9 @@ const deleteCart = async function (req, res) {
         let findUser = await userModel.findOne({ _id: userId })
         if (!findUser) { return res.status(404).send({ status: false, message: " User Already deleted" }) }
 
-        if (userId != req.userDetail.userId) { return res.status(403).send({ status: false, message: "you are not Authorised" }) }
+        //<-------- Authorisation ------------------>
+        if (userId != req.userDetail) { return res.status(403).send({ status: false, message: "you are not Authorised" }) }
+        //<----------------------------------------->
 
         let checkCart = await cartModel.findOne({ userId: userId })
 

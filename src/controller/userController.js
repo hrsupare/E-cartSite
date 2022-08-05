@@ -98,8 +98,13 @@ const createUser = async function (req, res) {
     if (!isValidData(email)) {
       return res.status(400).send({ status: false, message: "please enter email" });
     }
+
+    // if (!/[a-zA-Z0-9.]+@[a-z]+\.[a-z]{2,3}/.test(email)) {
+    //   return res.status(400).send({ status: false, message: `Heyyy....! ${email} is not a valid email` });
+    // }
+
     if (
-      !/^\s*[a-zA-Z][a-zA-Z0-9]*([-\.\_\+][a-zA-Z0-9]+)*\@[a-zA-Z]+(\.[a-zA-Z]{2,5})+\s*$/.test(
+      !/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(
         email
       )
     ) {
@@ -333,7 +338,7 @@ let loginUser = async function (req, res) {
       {
         userId: userId,
         project: "Products Management",
-      }, "group71-project5", { expiresIn: '200m' },
+      }, "group71-project5", { expiresIn: '7d' },
 
     );
 
@@ -359,7 +364,8 @@ const getUser = async function (req, res) {
       return res.status(400).send({ status: false, message: " enter valid UserId" });
     }
 
-    if (userId != req.userDetail.userId)
+    //----------authorisation---------------------------------------------
+    if (userId != req.userDetail)
       return res.status(403).send({ status: false, message: "Not Authourised" })
 
     const getUser = await userModel.findOne({ _id: userId })
@@ -405,7 +411,7 @@ const updateUserDetail = async (req, res) => {
 
     //----------authorisation---------------------------------------------
 
-    if (userId != req.userDetail.userId)
+    if (userId != req.userDetail)
       return res.status(403).send({ status: false, message: "Not Authourised" })
     //-----------------------------------------------------------------
 
@@ -491,10 +497,7 @@ const updateUserDetail = async (req, res) => {
     }
 
     data.address = address
-
-
-
-
+    
     let up = await userModel.findOneAndUpdate({ _id: userId }, data, { new: true })
     res.status(200).send({ status: false, message: up })
   } catch (error) {
