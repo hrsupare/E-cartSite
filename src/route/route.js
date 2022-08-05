@@ -35,11 +35,15 @@ router.post("/users/:userId/cart", authenticate, createCart)
 
 router.put("/users/:userId/cart", authenticate, updateCart)
 
-router.get('/users/:userId/cart', authenticate, getCart)
+router.get('/users/:userId/cart',authenticate, getCart)
 
-router.delete('/users/:userId/cart', authenticate, deleteCart)
+router.delete('/users/:userId/cart',authenticate, deleteCart)
 
 //=========================== FEATURE - 4 ORDER =========================================//
+
+router.post("/users/:userId/orders", authenticate, createOrder)
+
+router.put("/users/:userId/orders",authenticate, updateOrder)
 
 router.post("/users/:userId/orders", authenticate, createOrder)
 

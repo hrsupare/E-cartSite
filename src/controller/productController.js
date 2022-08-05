@@ -46,7 +46,7 @@ isvalidString = function (value) {
     return true;
 };
 
-//=/=/=/=/=/=/=/=/=/=/=/=/=/=/= createProduct =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+//=/=/=/=/=/=/=/=/=/=/=/=/=/=/= createProduct =/=/=/=/=/=/=/=/=/
 
 const createProduct = async (req, res) => {
 
@@ -126,7 +126,6 @@ const createProduct = async (req, res) => {
 
         if (style == 0) return res.status(400).send({ status: false, message: "style Box can't be empty..! please add style" })
 
-
         if (style) {
             if (!/^\s*[a-zA-Z ]{2,}\s*$/.test(style)) return res.status(400).send({ status: false, message: " Style is not valid " })
         }
@@ -164,8 +163,6 @@ const createProduct = async (req, res) => {
         res.status(201).send({ status: true, message: "Success", data: saveData })
 
     } catch (error) {
-        // if (error.message = "E11000 duplicate key error collection") return res.status(400).send({ status: false, message: "Title Already exist." })
-
         res.status(500).send({ status: false, message: error.message })
     }
 }
@@ -213,15 +210,18 @@ const getproductbyfilter = async function (req, res) {
 
         //<----------------------- taking filter for searching (price) ------------------>//
         if (priceGreaterThan == 0) return res.status(400).send({ status: false, message: "enter valid price" })
+
         if (priceGreaterThan) {
             if (!/^(0|[1-9]\d*)$/.test(priceGreaterThan)) return res.status(400).send({ status: false, message: "enter valid price" })
             filter.price = { $gt: priceGreaterThan }
         }
+
         if (priceLessThan == 0) return res.status(400).send({ status: false, message: "enter valid price" })
         if (priceLessThan) {
             if (!/^(0|[1-9]\d*)$/.test(priceLessThan)) return res.status(400).send({ status: false, message: "enter valid price" })
             filter.price = { $lt: priceLessThan }
         }
+
         if (priceGreaterThan && priceLessThan) {
             filter.price = { $gte: priceGreaterThan, $lte: priceLessThan }
         }
@@ -367,7 +367,6 @@ const updateProductDetail = async function (req, res) {
 
         let fileData = files[0];
         if (fileData) {
-            //console.log(fileData)
             if (!/([/|.|\w|\s|-])*\.(?:jpg|jpeg|png|JPG|JPEG|PNG)/.test(fileData.originalname)) return res.status(400).send({ status: false, message: " productImage is not in right format .." })
 
             if (files && files.length > 0) {
@@ -459,6 +458,4 @@ const deleteProductById = async function (req, res) {
         res.status(500).send({ msg: "Error", error: err.message });
     }
 }
-
-
-module.exports = { createProduct, getProductById, getproductbyfilter, updateProductDetail, deleteProductById }
+module.exports = { getproductbyfilter, createProduct, getProductById, deleteProductById, updateProductDetail }

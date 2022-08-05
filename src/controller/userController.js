@@ -98,23 +98,10 @@ const createUser = async function (req, res) {
     if (!isValidData(email)) {
       return res.status(400).send({ status: false, message: "please enter email" });
     }
-
-    // if (!/[a-zA-Z0-9.]+@[a-z]+\.[a-z]{2,3}/.test(email)) {
-    //   return res.status(400).send({ status: false, message: `Heyyy....! ${email} is not a valid email` });
-    // }
-
-    if (
-      !/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(
-        email
-      )
-    ) {
-      return res
-        .status(400)
-        .send({
-          status: false,
-          message: `Heyyy....! ${email} is not a valid email`,
-        });
+    if (!/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email)) {
+      return res.status(400).send({ status: false, message: `Heyyy....! ${email} is not a valid email` });
     }
+
 
     let checkEmail = await userModel.findOne({ email: email });
     if (checkEmail) {
@@ -308,7 +295,7 @@ let loginUser = async function (req, res) {
         .status(400)
         .send({ status: false, message: "Please provide Password" });
     }
-    if (!/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email1)) {
+    if (!/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email1)) {
       return res.status(400).send({
         status: false,
         message: "Email should be valid email address",
@@ -499,7 +486,7 @@ const updateUserDetail = async (req, res) => {
     data.address = address
     
     let up = await userModel.findOneAndUpdate({ _id: userId }, data, { new: true })
-    res.status(200).send({ status: false, message: up })
+    res.status(200).send({ status: true, message: "user updated",data:up })
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message })
   }

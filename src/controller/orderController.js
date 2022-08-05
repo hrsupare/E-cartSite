@@ -3,9 +3,8 @@ const userModel = require("../model/userModel")
 const cartModel = require("../model/cartModel")
 const mongoose = require("mongoose")
 
-// <====================== createOrder =========================>
 
-const createOrder = async function (req, res) {
+exports.createOrder = async function (req, res) {
     try {
         const userId = req.params.userId
         console.log(userId)
@@ -29,7 +28,7 @@ const createOrder = async function (req, res) {
         data.userId = userId
 
         //<-------- Authorisation ------------------>
-        if (userId != req.userDetail.userId) {
+        if (userId != req.userDetail) {
             return res.status(403).send({ status: false, message: `Heeyyy...Spam! you are not authorised to create Order` })
         }
 
@@ -80,11 +79,17 @@ const createOrder = async function (req, res) {
 
         data.status = 'pending'
 
-        const createOrderinDB = await orderModel.create(data)
+        let empItems = {}
+        empItems.items = []
+        empItems.totalPrice = 0
+        empItems.totalItems = 0
 
+        const clrItems = await cartModel.findOneAndUpdate({ _id: cartData }, empItems, { new: true })
+
+
+        const createOrderinDB = await orderModel.create(data)
         delete createOrderinDB._doc.deletedAt
         delete createOrderinDB._doc.isDeleted
-
         return res.status(201).send({ status: true, message: 'Success', data: createOrderinDB })
     } catch (error) {
         return res.status(500).send({ status: false, message: error.message })
@@ -92,9 +97,8 @@ const createOrder = async function (req, res) {
 
 }
 
-// <====================== updateOrder =========================>
 
-const updateOrder = async function (req, res) {
+exports.updateOrder = async function (req, res) {
 
     try {
         let userId = req.params.userId
@@ -110,7 +114,7 @@ const updateOrder = async function (req, res) {
 
         if (!userdb) return res.status(404).send({ status: false, message: "user is not present" })
 
-        if (req.userDetail.userId != userId) return res.status(403).send({ status: false, message: "user not Authorized to place order of diff user" })
+        if (userId != req.userDetail) return res.status(403).send({ status: false, message: "user not Authorized to place order " })
 
         if (!orderId) return res.status(400).send({ status: false, message: "please enter orderId in body" })
 
@@ -125,33 +129,42 @@ const updateOrder = async function (req, res) {
         if (orderdb.status == "completed") return res.status(400).send({ status: false, message: "order is already completed,cannot update" })
 
         if (orderdb.status == "cancled") return res.status(400).send({ status: false, message: "order is already cancled,cannot update" })
-        // console.log(userId)
-        console.log(orderdb.userId.toString())
-
+       
         if (orderdb.userId.toString() != userId) return res.status(400).send({ status: false, message: "this order does'nt belong to this user" })
 
-        if (orderdb.cancellable == false) {
-            if (status == "cancled") return res.status(400).send({ status: false, message: "this order cannot be cancelled" })
-
+        if (orderdb.cancellable == false && status == "cancled") {
+           
+            return res.status(400).send({ status: false, message: "this order cannot be cancelled" })
+        }
+        else {
             const update = await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { status: status } }, { new: true })
-
-            await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalItems: 0, totalPrice: 0 } }, { new: true })
-
+            // await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalItems: 0, totalPrice: 0 } }, { new: true })
             return res.status(200).send({ status: true, message: 'Success', data: update })
         }
-        if (orderdb.cancellable == true && orderdb.status == "pending") {
 
-            await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalItems: 0, totalPrice: 0 } }, { new: true })
 
-            const update = await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { status: status } }, { new: true })
 
-            return res.status(200).send({ status: true, message: 'Success', data: update })
-        }
+
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }
 
 }
 
-module.exports = { createOrder, updateOrder }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
