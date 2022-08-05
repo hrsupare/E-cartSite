@@ -351,7 +351,7 @@ const getUser = async function (req, res) {
       return res.status(400).send({ status: false, message: " enter valid UserId" });
     }
 
-    if (userId != req.userDetail.userId)
+    if (userId != req.userDetail)
       return res.status(403).send({ status: false, message: "Not Authourised" })
 
     const getUser = await userModel.findOne({ _id: userId })
@@ -397,7 +397,7 @@ const updateUserDetail = async (req, res) => {
 
     //----------authorisation---------------------------------------------
 
-    if (userId != req.userDetail.userId)
+    if (userId != req.userDetail)
       return res.status(403).send({ status: false, message: "Not Authourised" })
     //-----------------------------------------------------------------
 
@@ -488,7 +488,7 @@ const updateUserDetail = async (req, res) => {
 
 
     let up = await userModel.findOneAndUpdate({ _id: userId }, data, { new: true })
-    res.status(200).send({ status: false, message: up })
+    res.status(200).send({ status: true, message: "user updated",data:up })
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message })
   }

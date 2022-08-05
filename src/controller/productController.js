@@ -46,7 +46,7 @@ isvalidString = function (value) {
     return true;
 };
 
-//=/=/=/=/=/=/=/=/=/=/=/=/=/=/= createProduct =/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/=/
+//=/=/=/=/=/=/=/=/=/=/=/=/=/=/= createProduct =/=/=/=/=/=/=/=/=/
 
 const createProduct = async (req, res) => {
 
