@@ -41,10 +41,6 @@ const isValidData = function (value) {
     return true;
 };
 
-isvalidString = function (value) {
-    if (typeof value === "string" && value.trim().length == 0) return false;
-    return true;
-};
 
 //=/=/=/=/=/=/=/=/=/=/=/=/=/=/= createProduct =/=/=/=/=/=/=/=/=/
 
@@ -63,10 +59,10 @@ const createProduct = async (req, res) => {
 
         if (!/^(?=.*?[a-zA-Z])[,.! %?a-zA-Z\d ]+$/.test(title)) return res.status(400).send({ status: false, msg: `title is not a valid it can be aphaNumeric` });
 
+        let title1 = title.trim().split(" ").filter((word) => word).join(" ");
 
-        let uniqueTitle = await productModel.findOne({ title: title })
-
-        if (uniqueTitle) return res.status(400).send({ status: false, message: ` ${title} is Already Exist ` })
+        let uniqueTitle = await productModel.findOne({ title: title1 })
+        if (uniqueTitle) return res.status(400).send({ status: false, message: ` ${title1} is Already Exist ` })
 
         data.title = title.trim().split(" ").filter((word) => word).join(" ");
 
@@ -163,8 +159,6 @@ const createProduct = async (req, res) => {
         res.status(201).send({ status: true, message: "Success", data: saveData })
 
     } catch (error) {
-        if (error.message = "E11000 duplicate key error collection") return res.status(400).send({ status: false, message: "Title Already exist." })
-
         res.status(500).send({ status: false, message: error.message })
     }
 }
