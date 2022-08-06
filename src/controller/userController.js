@@ -4,7 +4,7 @@ const userModel = require("../model/userModel");
 const jwt = require('jsonwebtoken')
 const mongoose = require("mongoose");
 
-
+//=/=/=/=/=/=/=  AWS (Connection & uplode Function) =/=/=/=/=/=/=/=/=/=/=/=/
 
 aws.config.update({
   accessKeyId: "AKIAY3L35MCRVFM24Q7U",
@@ -47,7 +47,6 @@ const isValidData = function (value) {
 };
 
 
-
 //============================================= create user =====================================//
 
 
@@ -56,7 +55,6 @@ const createUser = async function (req, res) {
     let data = req.body;
 
     const { fname, lname, email, phone, password } = data;
-
 
     let files = req.files;
     //===== validate body ======//
@@ -101,7 +99,6 @@ const createUser = async function (req, res) {
     if (!/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email)) {
       return res.status(400).send({ status: false, message: `Heyyy....! ${email} is not a valid email` });
     }
-
 
     let checkEmail = await userModel.findOne({ email: email });
     if (checkEmail) {
@@ -177,15 +174,12 @@ const createUser = async function (req, res) {
     const hash = bcrypt.hashSync(password, saltRounds);
     data.password = hash;
 
-
-    // console.log(data)
     //===== validate address ======//
     try {
       data.address = JSON.parse(data.address);
     } catch {
       return res.status(400).send({ msg: "please enter  valid details || valid pincode" });
     }
-
 
     if (!data.address) {
       return res
@@ -229,7 +223,7 @@ const createUser = async function (req, res) {
     if (!data.address.billing) {
       return res
         .status(400)
-        .send({ status: false, msg: "please add   billing details  " });
+        .send({ status: false, msg: "please add billing details  " });
     }
     if (
       !isValidData(data.address.billing.street) ||
@@ -380,9 +374,6 @@ const updateUserDetail = async (req, res) => {
     var data = req.body
     const files = req.files;
 
-
-    //aws uplode
-
     if (files && files.length > 0) {
       let uploadedFileURL = await uploadFile(files[0]);
       data.profileImage = uploadedFileURL;
@@ -400,9 +391,6 @@ const updateUserDetail = async (req, res) => {
     if (userId != req.userDetail)
       return res.status(403).send({ status: false, message: "Not Authourised" })
     //-----------------------------------------------------------------
-
-
-
 
     if (fname == 0) return res.status(400).send({ status: false, message: "fname is empty" })
     if (fname) {
@@ -446,9 +434,6 @@ const updateUserDetail = async (req, res) => {
       data.password = hash;
     }
 
-
-
-    // console.log(address);
     if (address == 0) return res.status(400).send({ status: false, message: "address is empty" })
     if (address) {
       try {
@@ -457,35 +442,37 @@ const updateUserDetail = async (req, res) => {
         return res.status(400).send({ msg: "please enter Valid pincode" });
       }
       address = JSON.parse(address)
-
+      if (!address.shipping) {
+        return res.status(400).send({ status: false, msg: "please add shipping details" });
+      }
       if (!isValidData(address.shipping.street) || !/^([a-zA-Z 0-9\S]+)$/.test(address.shipping.street)
-      ) { return res.status(400).send({ status: false, message: "please add valid street" }); }
+      ) { return res.status(400).send({ status: false, message: "please add valid shipping street" }); }
 
 
       if (!isValidData(address.shipping.city) || !/^([a-zA-Z]+)$/.test(address.shipping.city)
-      ) { return res.status(400).send({ status: false, message: "please add valid city" }); }
+      ) { return res.status(400).send({ status: false, message: "please add valid shipping city" }); }
 
       if (!/^[1-9]{1}[0-9]{2}[0-9]{3}$/.test(address.shipping.pincode)
-      ) { return res.status(400).send({ status: false, message: "please add valid pincode" }); }
-
+      ) { return res.status(400).send({ status: false, message: "please add valid shipping pincode" }); }
+      
+      if (!address.billing) {
+        return res.status(400).send({ status: false, msg: "please add billing details  " });
+      }
       if (!isValidData(address.billing.street) || !/^([a-zA-Z 0-9\S]+)$/.test(address.billing.street)
-      ) { return res.status(400).send({ status: false, message: "please add valid street" }); }
+      ) { return res.status(400).send({ status: false, message: "please add valid billing street" }); }
 
       if (!isValidData(address.billing.city) || !/^([a-zA-Z]+)$/.test(address.billing.city)
       ) {
-        return res.status(400).send({ status: false, message: "please add valid city" });
+        return res.status(400).send({ status: false, message: "please add valid billing city" });
       }
 
       if (!/^[1-9]{1}[0-9]{2}[0-9]{3}$/.test(address.billing.pincode)
       ) {
-        return res.status(400).send({ status: false, message: "please add valid pincode" });
+        return res.status(400).send({ status: false, message: "please add valid billing pincode" });
       }
     }
 
     data.address = address
-
-
-
 
     let up = await userModel.findOneAndUpdate({ _id: userId }, data, { new: true })
     res.status(200).send({ status: true, message: "user updated",data:up })
