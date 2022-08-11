@@ -4,10 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start":"node src/index.js"
   },
-  "keywords": [],
-  "author": "",
+  
+  "author": "Jagadish M,Himanshu Supare,Subham Kumar,Chinmaya Sahoo",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1181.0",

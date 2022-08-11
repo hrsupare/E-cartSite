@@ -3,13 +3,12 @@ const userModel = require("../model/userModel")
 const cartModel = require("../model/cartModel")
 const mongoose = require("mongoose")
 
-
+//=/=/=/=/=/=/=/=/=/=/=/=/=/=/======== createOrder ========/=/=/=/=/=/=/=/=/
 const createOrder = async function (req, res) {
     try {
         const userId = req.params.userId
-        console.log(userId)
         const cartId = req.body.cartId
-        console.log(cartId)
+
         let data = {}
 
         //<------- userId Validation ----->
@@ -29,7 +28,7 @@ const createOrder = async function (req, res) {
 
         //<-------- Authorisation ------------------>
         if (userId != req.userDetail) {
-            return res.status(403).send({ status: false, message: `Heeyyy...Spam! you are not authorised to create Order` })
+            return res.status(403).send({ status: false, message: `you are not authorised to create Order` })
         }
 
         //<-------- cartId Validation ----->
@@ -86,7 +85,6 @@ const createOrder = async function (req, res) {
 
         const clrItems = await cartModel.findOneAndUpdate({ _id: cartData }, empItems, { new: true })
 
-
         const createOrderinDB = await orderModel.create(data)
         delete createOrderinDB._doc.deletedAt
         delete createOrderinDB._doc.isDeleted
@@ -97,6 +95,7 @@ const createOrder = async function (req, res) {
 
 }
 
+//=/=/=/=/=/=/=/=/=/=/=/=/=/=/======== updateOrder ========/=/=/=/=/=/=/=/=/
 
 const updateOrder = async function (req, res) {
 
@@ -105,7 +104,6 @@ const updateOrder = async function (req, res) {
         console.log(userId)
         let data = req.body
         let { orderId, status } = data
-        status = status.trim()
         if (!mongoose.isValidObjectId(userId)) return res.status(400).send({ status: false, message: "please enter valid userId " })
 
         if (!Object.keys(data).length) return res.status(400).send({ status: false, message: "body is Required.." })
@@ -119,7 +117,8 @@ const updateOrder = async function (req, res) {
         if (!orderId) return res.status(400).send({ status: false, message: "please enter orderId in body" })
 
         if (!mongoose.isValidObjectId(orderId)) return res.status(400).send({ status: false, message: "please enter valid OrderId " })
-
+        if (!status) return res.status(400).send({ status: false, message: "Status is required.." })
+        status = status.trim()
         if (!["completed", "cancled"].includes(status)) return res.status(400).send({ status: false, message: "choose one of these (completed or cancled)" })
 
         const orderdb = await orderModel.findOne({ _id: orderId })
@@ -138,17 +137,14 @@ const updateOrder = async function (req, res) {
         }
         else {
             const update = await orderModel.findOneAndUpdate({ _id: orderId }, { $set: { status: status } }, { new: true })
-            // await cartModel.findOneAndUpdate({ userId: userId }, { $set: { items: [], totalItems: 0, totalPrice: 0 } }, { new: true })
             return res.status(200).send({ status: true, message: 'Success', data: update })
         }
-
-
-
 
     } catch (err) {
         return res.status(500).send({ status: false, message: err.message })
     }
 
 }
+
 
 module.exports = { createOrder, updateOrder }
