@@ -23,11 +23,12 @@ const createCart = async (req, res) => {
 
         if (!findUser) return res.status(404).send({ status: false, message: "User not found" })
 
-        //// /------------------------------authorisation-----------------------------------
+        /////------------------------------authorisation-----------------------------------//////
 
         if (userId != req.userDetail)
             return res.status(403).send({ status: false, message: "you are not Authorised" })
-        ///// /-------------------------------------------------------------------------------
+
+        //////-----------------------------------------------------------------------------//////
 
         if (!mongoose.isValidObjectId(productId)) return res.status(400).send({ status: false, message: "ProductId is not Valid ObjectId.." })
 
@@ -103,10 +104,13 @@ const updateCart = async function (req, res) {
             return res.status(404).send({ status: false, message: `Heeyyy...! There is No user With the ${userId} userId` })
         }
 
-        //<-------- Authorisation ------------------>
+        /////------------------------------authorisation-----------------------------------//////
+        
         if (userId != req.userDetail) {
             return res.status(403).send({ status: false, message: `Heeyyy...Spam! you are not authorised to update the cart Items` })
         }
+
+        //////-----------------------------------------------------------------------------//////
 
         //<-------- cartId Validation ----->
         if (!cartId || cartId.trim().length == 0) {
@@ -164,7 +168,7 @@ const updateCart = async function (req, res) {
 
         for (let i = 0; i < items.length; i++) {
 
-            if (productId == items[i].productId.toString()) {
+            if (productId == items[i].productId ) {
 
                 if (findProductInDB.isDeleted == true) {
 
@@ -175,22 +179,15 @@ const updateCart = async function (req, res) {
                 else if (findProductInDB.isDeleted == false) {
                     if (removeProduct == 1) {
 
-                        if (items[i].quantity == 0) {
-                            return res.status(400).send({ status: false, message: `Sorryyy....! Cart has no items to remove` })
-                        }
-
+                    
                         items[i].quantity = items[i].quantity - 1
 
-                        cartData.totalPrice = totalPrice - ProductPrice * 1
+                        cartData.totalPrice = totalPrice - ProductPrice 
 
                         if (items[i].quantity != 0) { array.push(items[i]) }
                     }
 
                     else if (removeProduct == 0) {
-
-                        if (items[i].quantity == 0) {
-                            return res.status(400).send({ status: false, message: `Sorryyy....! Cart has no items to remove` })
-                        }
 
                         let ProductPriceCount = ProductPrice * items[i].quantity
 
@@ -200,7 +197,7 @@ const updateCart = async function (req, res) {
 
                     }
                 }
-            } else if (productId != items[i].productId.toString()) {
+            } else if (productId != items[i].productId) {
                 array.push(cartData.items[i])
             }
 
@@ -258,7 +255,7 @@ const deleteCart = async function (req, res) {
         let findUser = await userModel.findOne({ _id: userId })
         if (!findUser) { return res.status(404).send({ status: false, message: " User Already deleted" }) }
 
-          //<-------- Authorisation ------------------>
+        //<-------- Authorisation ------------------>
         if (userId != req.userDetail) { return res.status(403).send({ status: false, message: "you are not Authorised" }) }
 
         let checkCart = await cartModel.findOne({ userId: userId })

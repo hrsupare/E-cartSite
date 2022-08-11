@@ -4,7 +4,7 @@ const cartModel = require("../model/cartModel")
 const mongoose = require("mongoose")
 
 
-exports.createOrder = async function (req, res) {
+const createOrder = async function (req, res) {
     try {
         const userId = req.params.userId
         console.log(userId)
@@ -98,7 +98,7 @@ exports.createOrder = async function (req, res) {
 }
 
 
-exports.updateOrder = async function (req, res) {
+const updateOrder = async function (req, res) {
 
     try {
         let userId = req.params.userId
@@ -129,11 +129,11 @@ exports.updateOrder = async function (req, res) {
         if (orderdb.status == "completed") return res.status(400).send({ status: false, message: "order is already completed,cannot update" })
 
         if (orderdb.status == "cancled") return res.status(400).send({ status: false, message: "order is already cancled,cannot update" })
-       
+
         if (orderdb.userId.toString() != userId) return res.status(400).send({ status: false, message: "this order does'nt belong to this user" })
 
         if (orderdb.cancellable == false && status == "cancled") {
-           
+
             return res.status(400).send({ status: false, message: "this order cannot be cancelled" })
         }
         else {
@@ -151,20 +151,4 @@ exports.updateOrder = async function (req, res) {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+module.exports = { createOrder, updateOrder }

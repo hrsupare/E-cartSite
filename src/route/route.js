@@ -6,48 +6,50 @@ const { getproductbyfilter, createProduct, getProductById, updateProductDetail, 
 const { createCart, updateCart, getCart, deleteCart } = require("../controller/cartController")
 const { createOrder, updateOrder } = require("../controller/orderController")
 
+// ==================== FEATURE - 1  USER ============================ //
 
-//==================== FEATURE - 1  USER ==============================//
+router.post('/register', createUser) //h
 
-router.post('/register', createUser)
+router.post('/login', loginUser) //c
 
-router.post('/login', loginUser)
+router.get('/user/:userId/profile', authenticate, getUser) //j
 
-router.get('/user/:userId/profile', authenticate, getUser)
+router.put('/user/:userId/profile', authenticate, updateUserDetail) //s
 
-router.put('/user/:userId/profile', authenticate, updateUserDetail)
+// ==================== FEATURE - 2 PRODUCT ========================== //
 
-//==================== FEATURE - 2 PRODUCT ===============================//
+router.post('/products', createProduct) //s
 
-router.post('/products', createProduct)
+router.get("/products", getproductbyfilter)//j
 
-router.get("/products", getproductbyfilter)
+router.get("/products/:productId", getProductById)//h
 
-router.get("/products/:productId", getProductById)
+router.put("/products/:productId", updateProductDetail)//c
 
-router.put("/products/:productId", updateProductDetail)
+router.delete("/products/:productId", deleteProductById)//h
 
-router.delete("/products/:productId", deleteProductById)
+// ==================== FEATURE - 3 CART =============================== //
 
-//==================== FEATURE - 3 CART ===============================//
+router.post("/users/:userId/cart", authenticate, createCart) // j s
 
-router.post("/users/:userId/cart", authenticate, createCart)
+router.put("/users/:userId/cart", authenticate, updateCart) //h
 
-router.put("/users/:userId/cart", authenticate, updateCart)
+router.get('/users/:userId/cart', authenticate, getCart) //s
 
-router.get('/users/:userId/cart',authenticate, getCart)
+router.delete('/users/:userId/cart', authenticate, deleteCart) //c
 
-router.delete('/users/:userId/cart',authenticate, deleteCart)
+// ==================== FEATURE - 4 ORDER =============================== //
 
-//=========================== FEATURE - 4 ORDER =========================================//
+router.post("/users/:userId/orders", authenticate, createOrder) //h c
 
-router.post("/users/:userId/orders", authenticate, createOrder)
+router.put("/users/:userId/orders", authenticate, updateOrder) //j s
 
-router.put("/users/:userId/orders",authenticate, updateOrder)
+// ==================== ERROR =============================== //
 
-router.post("/users/:userId/orders", authenticate, createOrder)
-
-router.put("/users/:userId/orders", authenticate, updateOrder)
-
-
+router.all("/**", function (req, res) {
+    res.status(404).send({
+        status: false,
+        msg: "The api you request is not available"
+    })
+})
 module.exports = router;
